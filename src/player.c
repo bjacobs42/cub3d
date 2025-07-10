@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        ::::::::            */
-/*   player.c                                           :+:    :+:            */
+/*   player.c                                           :+:      :+:    :+:   */
 /*                                                     +:+                    */
 /*   By: bjacobs <bjacobs@student.codam.nl>           +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2024/02/16 18:39:52 by bjacobs       #+#    #+#                 */
-/*   Updated: 2024/02/16 18:45:44 by mbernede      ########   odam.nl         */
+/*   Updated: 2025/07/10 14:59:15 by bjacobs          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,11 +85,13 @@ void	change_player_angle(t_player *player, double turnspeed, double dt)
 	player->delta.y = sin(player->angle) * WALKSPEED;
 }
 
-void	init_player(t_map map, t_player *player)
+void	init_player(const Map& map, Player& player)
 {
+	Player initial_player_data = map.get_initial_player();
+
+
 	char	direction;
-	int		x;
-	int		y;
+	int		x, y;
 
 	get_char_start(map, &y, &x);
 	direction = map.map[y][x];
