@@ -1,17 +1,17 @@
 #pragma once
 
-#include <array>
-#include <memory>
-#include <ostream>
+#include "Config.hpp"
+#include <cstdint>
 #include <string>
-#include <vector>
-#include "RGBA.hpp"
-#include "../MLX42/include/MLX42/MLX42.h"
 
 #define OK true
 #define ERROR false
-#define WHITESPACE " \t\r\n"
 #define MAP_CHARS "10DNEWS \t"
+
+enum Flags : uint8_t {
+	DOOR_INCLUDED = 1 << 0,
+	MAP_PROCESSED = 1 << 1
+};
 
 enum TextureType {
 	NO,
@@ -21,24 +21,6 @@ enum TextureType {
 	DOOR,
 	INVALID_TEXTURE
 };
-
-struct MlxTextureDeleter {
-	void operator()(mlx_texture_t* texture) const
-	{
-		if (texture)
-			mlx_delete_texture(texture);
-	}
-};
-
-using UniqueTexturePtr = std::unique_ptr<mlx_texture_t, MlxTextureDeleter>;
-struct Config
-{
-	RGBA							floor;
-	RGBA							ceiling;
-	std::vector<std::string>		mapData;
-	std::array<UniqueTexturePtr, 5>	textures{};
-};
-std::ostream&	operator<<(std::ostream& os, const Config& config);
 
 struct ParseResult {
 	bool		ok;
@@ -51,7 +33,7 @@ struct ParseResult {
 class Parser
 {
 	private:
-		bool		_isMapProcessed;
+		uint8_t		_flags;
 		std::string	_filePath;
 		Config		_configData;
 
@@ -59,11 +41,6 @@ class Parser
 		ParseResult	_processLine(std::ifstream& file, std::string& line);
 		ParseResult	_processFnC(const std::string& key, const std::string& color);
 		ParseResult	_processTexture(const std::string& key,  const std::string& path);
-
-		bool		_endsWith(const std::string& string, const std::string& end);
-		void		_eraseWhiteSpace(std::string& string);
-		bool		_isLineEmpty(const std::string& line);
-		void		_rtrim(std::string& string);
 
 		bool		_checkMapLine(const std::string& line);
 		ParseResult	_checkData(void);

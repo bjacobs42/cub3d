@@ -1,5 +1,6 @@
-#include "../../include/Parser.hpp"
-#include <algorithm>
+#include "Parser/Parser.hpp"
+#include "Parser/ParserHelpers.hpp"
+#include <cstring>
 #include <exception>
 #include <fstream>
 #include <sstream>
@@ -16,18 +17,27 @@ TextureType	keyToTextureType(const std::string& key)
 
 bool	Parser::_checkMapLine(const std::string& line)
 {
-	return (line.find_first_not_of(MAP_CHARS) == std::string::npos);
+	for (char c : line)
+	{
+		if (c == 'D' && !(_flags & DOOR_INCLUDED))
+			_flags |= DOOR_INCLUDED;
+		if (!std::strchr(MAP_CHARS, c))
+			return (false);
+	}
+	return (true);
 }
 
 ParseResult	Parser::_checkData(void)
 {
-	if (!_isMapProcessed)
+	if (!(_flags & MAP_PROCESSED))
 		return (ParseResult(ERROR, "No map found"));
-	for (int i = 0; i < 5; ++i)
+	for (size_t i = 0; i < TextureType::DOOR; ++i)
 	{
-		if (i != 4 && !_configData.textures[i].get())
+		if (!_configData.textures[i].get())
 			return (ParseResult(ERROR, "Missing textures or no textures found"));
 	}
+	if (_flags & DOOR_INCLUDED && !_configData.textures[TextureType::DOOR])
+		return (ParseResult(ERROR, "Missing texture or no texture found for door"));
 	return (ParseResult(OK));
 }
 
@@ -37,45 +47,11 @@ Parser::Parser(const std::string& filePath)
 Parser::~Parser(void)
 {}
 
-bool	Parser::_isLineEmpty(const std::string& line)
-{
-	return (line.find_first_not_of(WHITESPACE) == std::string::npos);
-}
-
-void	Parser::_eraseWhiteSpace(std::string& string)
-{
-	string.erase(
-		std::remove_if(string.begin(), string.end(), [](unsigned char ch) {
-			return (std::isspace(ch));
-		}),
-		string.end()
-	);
-}
-
-bool	Parser::_endsWith(const std::string& string, const std::string& end)
-{
-	if (string.size() < end.size()
-		|| string.compare(string.size() - end.size(), end.size(), end))
-	{
-		return (false);
-	}
-	return (true);
-}
-
-void	Parser::_rtrim(std::string& string)
-{
-	size_t	end = string.find_last_not_of(WHITESPACE);
-	if (end != std::string::npos)
-		string.erase(end + 1);
-	else
-		string.clear();
-}
-
 ParseResult	Parser::_processMap(std::ifstream& file, std::string& line)
 {
 	do 
 	{
-		_rtrim(line);
+		ParserHelpers::rtrim(line);
 		if (line.empty())
 			break;
 		if (!_checkMapLine(line))
@@ -85,7 +61,7 @@ ParseResult	Parser::_processMap(std::ifstream& file, std::string& line)
 	while (std::getline(file, line));
 	if (_configData.mapData.empty())
 		return (ParseResult(ERROR, "Missing map section"));
-	_isMapProcessed = true;
+	_flags |= MAP_PROCESSED;
 	return (ParseResult(OK));
 }
 
@@ -126,7 +102,7 @@ ParseResult	Parser::_processTexture(const std::string& key,  const std::string& 
 {
 	if (path.empty())
 		return (ParseResult(ERROR, "Missing texture for \"" + key + "\""));
-	if (!_endsWith(path, ".png"))
+	if (!ParserHelpers::endsWith(path, ".png"))
 		return (ParseResult(ERROR, "Unsupported texture extension"));
 
 	TextureType	type = keyToTextureType(key);
@@ -148,7 +124,7 @@ ParseResult	Parser::_processLine(std::ifstream& file, std::string& line)
 	{
 		std::string	color;
 		std::getline(iss, color);
-		_eraseWhiteSpace(color);
+		ParserHelpers::eraseWhiteSpace(color);
 		return (_processFnC(key, color));
 	}
 	else if (key == "NO" || key == "SO" || key == "WE" ||  key == "EA" || key == "DOOR")
@@ -156,10 +132,10 @@ ParseResult	Parser::_processLine(std::ifstream& file, std::string& line)
 		std::string	texturePath;
 		std::getline(iss, texturePath);
 
-		_eraseWhiteSpace(texturePath);
+		ParserHelpers::eraseWhiteSpace(texturePath);
 		return (_processTexture(key, texturePath));
 	}
-	else if (!_isMapProcessed)
+	else if (!(_flags & MAP_PROCESSED))
 		return (_processMap(file, line));
 	else
 		return (ParseResult(ERROR, "Unexpected line or misplaced content: " + line));
@@ -175,7 +151,7 @@ ParseResult	Parser::parse(void)
 	std::ifstream	file;
 	std::string		line;
 
-	if (!_endsWith(_filePath, ".cub"))
+	if (!ParserHelpers::endsWith(_filePath, ".cub"))
 		return (ParseResult(ERROR, "Unsupported file extension"));
 	file.open(_filePath);
 	if (!file.is_open())
@@ -183,7 +159,7 @@ ParseResult	Parser::parse(void)
 
 	while (std::getline(file, line))
 	{
-		if (_isLineEmpty(line))
+		if (ParserHelpers::isLineEmpty(line))
 			continue;
 		ParseResult processResult = _processLine(file, line);
 		if (!processResult.ok) return (processResult);

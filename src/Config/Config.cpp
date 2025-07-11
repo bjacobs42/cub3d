@@ -1,4 +1,6 @@
-#include "../../include/Parser.hpp"
+#include "Config.hpp"
+#include "MLX42.h"
+#include <ostream>
 
 std::ostream&	operator<<(std::ostream& os, const Config& config)
 {

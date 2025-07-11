@@ -2,3 +2,4 @@ obj/
 cub3D
 .vscode
 gmon.out
+compile_flags.txt

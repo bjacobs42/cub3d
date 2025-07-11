@@ -6,11 +6,11 @@
 /*   By: bjacobs <bjacobs@student.codam.nl>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/09 03:23:36 by bjacobs           #+#    #+#             */
-/*   Updated: 2025/07/11 22:17:03 by bjacobs          ###   ########.fr       */
+/*   Updated: 2025/07/11 23:57:05 by bjacobs          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/RGBA.hpp"
+#include "RGBA.hpp"
 
 RGBA::RGBA(const uint8_t r, const uint8_t g, const uint8_t b, const uint8_t a)
 	: _r(r), _g(g), _b(b), _a(a)
