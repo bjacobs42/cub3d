@@ -1,4 +1,4 @@
-#include "../../includes/Parser.hpp"
+#include "../../include/Parser.hpp"
 #include <algorithm>
 #include <exception>
 #include <fstream>
@@ -13,8 +13,33 @@ TextureType	keyToTextureType(const std::string& key)
 	return (TextureType::INVALID_TEXTURE);
 }
 
+bool	Parser::_checkMapLine(const std::string& line)
+{
+	return (line.find_first_not_of(MAP_CHARS) == std::string::npos);
+}
+
+ParseResult	Parser::_checkData(void)
+{
+	if (!_isMapProcessed)
+		return (ParseResult(ERROR, "No map found"));
+	for (const UniqueTexturePtr& texture : _configData.textures)
+	{
+		if (!texture)
+			return (ParseResult(ERROR, "Missing textures or no textures found"));
+	}
+	return (ParseResult(OK));
+}
+
 Parser::Parser(const std::string& filePath)
 	: _filePath(filePath) {}
+
+Parser::~Parser(void)
+{}
+
+bool	Parser::_isLineEmpty(const std::string& line)
+{
+	return (line.find_first_not_of(WHITESPACE) == std::string::npos);
+}
 
 void	Parser::_eraseWhiteSpace(std::string& string)
 {
@@ -35,8 +60,31 @@ bool	Parser::_endsWith(const std::string& string, const std::string& end)
 	return (true);
 }
 
-ParseResult	Parser::_processMap(const std::ifstream& file, const std::string& line)
+void	Parser::_rtrim(std::string& string)
 {
+	size_t	end = string.find_last_not_of(WHITESPACE);
+	if (end != std::string::npos)
+		string.erase(end + 1);
+	else
+		string.clear();
+}
+
+ParseResult	Parser::_processMap(std::ifstream& file, std::string& line)
+{
+	do 
+	{
+		_rtrim(line);
+		if (line.empty())
+			break;
+		if (!_checkMapLine(line))
+			return (ParseResult(ERROR, "Invalid map format: " + line));
+		_configData.mapData.push_back(line);
+	}
+	while (std::getline(file, line));
+	if (_configData.mapData.empty())
+		return (ParseResult(ERROR, "Missing map section"));
+	_isMapProcessed = true;
+	return (ParseResult(OK));
 }
 
 ParseResult	Parser::_processFnC(const std::string& key, const std::string& color)
@@ -56,7 +104,9 @@ ParseResult	Parser::_processFnC(const std::string& key, const std::string& color
 			return (ParseResult(ERROR, "Invalid rgb format: " + color));
 		try
 		{
-			rgb[count++] = std::stoi(token);
+			rgb[count] = std::stoi(token);
+			if (rgb[count] < 0) throw std::exception();
+			count++;
 		}
 		catch (const std::exception& e)
 		{
@@ -78,13 +128,13 @@ ParseResult	Parser::_processTexture(const std::string& key,  const std::string& 
 		return (ParseResult(ERROR, "Unsupported texture extension"));
 
 	TextureType	type = keyToTextureType(key);
-	_textures[type] = mlx_load_png(path.c_str());
-	if (!_textures[type])
+	_configData.textures[type] = UniqueTexturePtr(mlx_load_png(path.c_str()));
+	if (!_configData.textures[type])
 		return (ParseResult(ERROR, "Failed to load texture " + path));
 	return (ParseResult(OK));
 }
 
-ParseResult	Parser::_processLine(const std::ifstream& file, const std::string& line)
+ParseResult	Parser::_processLine(std::ifstream& file, std::string& line)
 {
 	std::istringstream	iss(line);
 	std::string			key;
@@ -105,7 +155,7 @@ ParseResult	Parser::_processLine(const std::ifstream& file, const std::string& l
 		_eraseWhiteSpace(texturePath);
 		return (_processTexture(key, texturePath));
 	}
-	else if (!_isMapProcessed())
+	else if (!_isMapProcessed)
 		return (_processMap(file, line));
 	else
 		return (ParseResult(ERROR, "Unexpected line or misplaced content: " + line));
@@ -124,10 +174,10 @@ ParseResult	Parser::parse(void)
 
 	while (std::getline(file, line))
 	{
-		if (line.empty() || line.find_first_not_of(" \t") == std::string::npos)
+		if (_isLineEmpty(line))
 			continue;
 		ParseResult processResult = _processLine(file, line);
 		if (!processResult.ok) return (processResult);
 	}
-	return (ParseResult(OK));
+	return (_checkData());
 }

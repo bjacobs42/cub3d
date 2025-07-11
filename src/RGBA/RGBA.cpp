@@ -6,23 +6,20 @@
 /*   By: bjacobs <bjacobs@student.codam.nl>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/09 03:23:36 by bjacobs           #+#    #+#             */
-/*   Updated: 2024/05/09 15:03:16 by bjacobs          ###   ########.fr       */
+/*   Updated: 2025/07/11 20:38:42 by bjacobs          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/RGBA.hpp"
 
-RGBA::RGBA(void) : _r(0),  _g(0), _b(0),  _a(0xFF)
+RGBA::RGBA(const uint8_t r, const uint8_t g, const uint8_t b, const uint8_t a)
+	: _r(r), _g(g), _b(b), _a(a)
 {}
 
 RGBA::RGBA(const uint32_t &color)
 {
 	*this = color;
 }
-
-RGBA::RGBA(const uint8_t r, const uint8_t g, const uint8_t b, const uint8_t a)
-	: _r(r), _g(g), _b(b), _a(a)
-{}
 
 RGBA::RGBA(const RGBA &source)
 {

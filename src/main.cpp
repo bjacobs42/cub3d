@@ -1,0 +1,19 @@
+#include <iostream>
+#include "../include/Parser.hpp"
+
+int	main(int argc, char  **argv)
+{
+	if  (argc != 2)
+	{
+		std::cout << "Cub3d: Usage: ./cub3d [filename].cub" << std::endl;
+		return (1);
+	}
+	Parser parser(argv[1]);
+	ParseResult result = parser.parse();
+	if (!result.ok)
+	{
+		std::cout << "Cub3d: " << result.message << std::endl;
+		return (1);
+	}
+	return (0);
+}
