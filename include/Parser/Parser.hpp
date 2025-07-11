@@ -13,15 +13,6 @@ enum Flags : uint8_t {
 	MAP_PROCESSED = 1 << 1
 };
 
-enum TextureType {
-	NO,
-	SO,
-	WE,
-	EA,
-	DOOR,
-	INVALID_TEXTURE
-};
-
 struct ParseResult {
 	bool		ok;
 	std::string	message;

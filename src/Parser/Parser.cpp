@@ -1,19 +1,10 @@
 #include "Parser/Parser.hpp"
 #include "Parser/ParserHelpers.hpp"
+#include "TextureUtils.hpp"
 #include <cstring>
 #include <exception>
 #include <fstream>
 #include <sstream>
-
-TextureType	keyToTextureType(const std::string& key)
-{
-	if (key == "NO")  return (TextureType::NO);
-	if (key == "SO")  return (TextureType::SO);
-	if (key == "WE")  return (TextureType::WE);
-	if (key == "EA")  return (TextureType::EA);
-	if (key == "DOOR")  return (TextureType::DOOR);
-	return (TextureType::INVALID_TEXTURE);
-}
 
 bool	Parser::_checkMapLine(const std::string& line)
 {
@@ -105,7 +96,7 @@ ParseResult	Parser::_processTexture(const std::string& key,  const std::string& 
 	if (!ParserHelpers::endsWith(path, ".png"))
 		return (ParseResult(ERROR, "Unsupported texture extension"));
 
-	TextureType	type = keyToTextureType(key);
+	TextureType	type = TextureUtils::keyToTextureType(key);
 	if (type == TextureType::INVALID_TEXTURE)
 		return (ParseResult(ERROR, "Unknown texture type \"" + key + "\""));
 	_configData.textures[type] = UniqueTexturePtr(mlx_load_png(path.c_str()));

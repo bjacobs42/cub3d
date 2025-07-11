@@ -25,7 +25,7 @@ INC_DIR		:= ./include/
 OBJ_DIR 	:= ./obj/
 SRC_DIR 	:= ./src/
 
-HEADER_FILES 	:= Map.hpp Player.hpp RGBA.hpp Vec2.hpp
+HEADER_FILES 	:= Map.hpp Player.hpp RGBA.hpp Vec2.hpp TextureUtils.hpp
 HEADER_FILES	+= $(addprefix $(PARSER_DIR),Parser.hpp ParserHelpers.hpp)
 
 PARSER_FILES	:= Parser.cpp ParserHelpers.cpp
@@ -34,7 +34,7 @@ CONFIG_FILES	:= Config.cpp
 
 HEADERS := $(addprefix $(INC_DIR),$(HEADER_FILES))
 
-SRC :=	main.cpp
+SRC :=	main.cpp TextureUtils.cpp
 SRC +=	$(addprefix $(PARSER_DIR),$(PARSER_FILES))
 SRC +=	$(addprefix $(RGBA_DIR),$(RGBA_FILES))
 SRC +=	$(addprefix $(CONFIG_DIR),$(CONFIG_FILES))
