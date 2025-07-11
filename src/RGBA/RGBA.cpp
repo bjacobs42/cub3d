@@ -6,7 +6,7 @@
 /*   By: bjacobs <bjacobs@student.codam.nl>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/09 03:23:36 by bjacobs           #+#    #+#             */
-/*   Updated: 2025/07/11 20:38:42 by bjacobs          ###   ########.fr       */
+/*   Updated: 2025/07/11 22:17:03 by bjacobs          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,4 +115,11 @@ uint32_t	RGBA::lerp(const RGBA &color1, const RGBA &color2, const float &t)
 	result.setBlue(color1._b * (1.0f - t) + color2._b * t);
 	result.setAlpha(color1._a * (1.0f - t) + color2._a * t);
 	return (result.toInt32());
+}
+
+std::ostream&	operator<<(std::ostream& os, const RGBA& color)
+{
+	os << int(color.getRed()) << ","  << int(color.getGreen())
+		<< "," << int(color.getBlue()) << "," << int(color.getAlpha());
+	return (os);
 }

@@ -6,7 +6,7 @@
 /*   By: bjacobs <bjacobs@student.codam.nl>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/09 03:14:49 by bjacobs           #+#    #+#             */
-/*   Updated: 2025/07/11 20:38:29 by bjacobs          ###   ########.fr       */
+/*   Updated: 2025/07/11 21:19:30 by bjacobs          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #define WHITE		0xFFFFFFFF
 #define INVISIBLE	0xFFFFFF00
 
+#include <ostream>
 #include <cstdint>
 
 class RGBA
@@ -50,3 +51,5 @@ class RGBA
 
 		static uint32_t	lerp(const RGBA &color1, const RGBA &color2, const float &t);
 };
+
+std::ostream&	operator<<(std::ostream& os, const RGBA& color);

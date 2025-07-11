@@ -15,5 +15,7 @@ int	main(int argc, char  **argv)
 		std::cout << "Cub3d: " << result.message << std::endl;
 		return (1);
 	}
+	const Config& config = parser.getConfig();
+	std::cout << config << std::endl;
 	return (0);
 }

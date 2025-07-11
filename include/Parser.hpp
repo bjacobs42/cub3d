@@ -1,6 +1,8 @@
 #pragma once
 
+#include <array>
 #include <memory>
+#include <ostream>
 #include <string>
 #include <vector>
 #include "RGBA.hpp"
@@ -9,7 +11,7 @@
 #define OK true
 #define ERROR false
 #define WHITESPACE " \t\r\n"
-#define MAP_CHARS "10DNEWS"
+#define MAP_CHARS "10DNEWS \t"
 
 enum TextureType {
 	NO,
@@ -35,8 +37,8 @@ struct Config
 	RGBA							ceiling;
 	std::vector<std::string>		mapData;
 	std::array<UniqueTexturePtr, 5>	textures{};
-	std::array<xpm_t*, 5>			xpms{};
 };
+std::ostream&	operator<<(std::ostream& os, const Config& config);
 
 struct ParseResult {
 	bool		ok;
@@ -65,10 +67,11 @@ class Parser
 
 		bool		_checkMapLine(const std::string& line);
 		ParseResult	_checkData(void);
-	
+
 	public:
 		explicit Parser(const std::string& filePath);
 		~Parser(void);
 
-		ParseResult	parse(void);
+		ParseResult		parse(void);
+		const Config&	getConfig(void) const;
 };

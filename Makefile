@@ -4,11 +4,12 @@
 NAME	:= cub3D
 MLX_DIR	:= MLX42/
 MLX42	:= $(MLX_DIR)build/
+LIBSA	:= $(MLX42)libmlx42.a
 INCLUDE := -I MLX42 -I include
 
 # Compiler and Flags
 CC := c++
-CFLAGS := -g -Wall -Wextra -Werror #-fsanitize=address
+CFLAGS := -g -Wall -Wextra -Werror -fsanitize=address
 
 ifeq ($(shell uname), Linux)
 	MLX_FLAGS := -ldl -lglfw -pthread -lm
@@ -23,13 +24,16 @@ HEADERS := include/Map.hpp include/Parser.hpp include/Player.hpp include/RGBA.hp
 
 S_PARSER_DIR	:= Parser/
 S_RGBA_DIR		:= RGBA/
+S_CONFIG_DIR	:= Config/
 
 S_PARSER_FILES	:= Parser.cpp
 S_RGBA_FILES	:= RGBA.cpp
+S_CONFIG_FILES	:= Config.cpp
 
 SRC :=	main.cpp
 SRC +=	$(addprefix $(S_PARSER_DIR),$(S_PARSER_FILES))
 SRC +=	$(addprefix $(S_RGBA_DIR),$(S_RGBA_FILES))
+SRC +=	$(addprefix $(S_CONFIG_DIR),$(S_CONFIG_FILES))
 
 OBJ := $(addprefix $(OBJ_DIR),$(SRC:.cpp=.o))
 
@@ -41,7 +45,7 @@ all: $(NAME)
 $(NAME): $(OBJ) | $(MLX42)
 	@echo $(Yellow) Building.. 🏠$(Color_Off)
 	@make -C $(MLX42)
-	@$(CC) -Ofast -o $(NAME) $^ $(CFLAGS) $(INCLUDE) $(MLX_FLAGS)
+	@$(CC) -Ofast -o $(NAME) $^ $(LIBSA) $(CFLAGS) $(INCLUDE) $(MLX_FLAGS)
 	@echo $(Green) Complete ✅ $(Color_Off)
 
 $(OBJ_DIR)%.o: $(SRC_DIR)%.cpp $(HEADERS) | $(OBJ_DIR)
