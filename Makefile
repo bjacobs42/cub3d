@@ -21,6 +21,8 @@ endif
 PARSER_DIR	:= Parser/
 RGBA_DIR	:= RGBA/
 CONFIG_DIR	:= Config/
+MAP_DIR		:= Map/
+UTILS_DIR	:= Utils/
 INC_DIR		:= ./include/
 OBJ_DIR 	:= ./obj/
 SRC_DIR 	:= ./src/
@@ -29,15 +31,19 @@ HEADER_FILES 	:= Map.hpp Player.hpp RGBA.hpp Vec2.hpp TextureUtils.hpp
 HEADER_FILES	+= $(addprefix $(PARSER_DIR),Parser.hpp ParserHelpers.hpp)
 
 PARSER_FILES	:= Parser.cpp ParserHelpers.cpp
+UTILS_FILES		:= TextureUtils.cpp
+MAP_FILES		:= Map.cpp
 RGBA_FILES		:= RGBA.cpp
 CONFIG_FILES	:= Config.cpp
 
 HEADERS := $(addprefix $(INC_DIR),$(HEADER_FILES))
 
-SRC :=	main.cpp TextureUtils.cpp
+SRC :=	main.cpp
 SRC +=	$(addprefix $(PARSER_DIR),$(PARSER_FILES))
 SRC +=	$(addprefix $(RGBA_DIR),$(RGBA_FILES))
 SRC +=	$(addprefix $(CONFIG_DIR),$(CONFIG_FILES))
+SRC +=	$(addprefix $(MAP_DIR),$(MAP_FILES))
+SRC +=	$(addprefix $(UTILS_DIR),$(UTILS_FILES))
 
 OBJ := $(addprefix $(OBJ_DIR),$(SRC:.cpp=.o))
 

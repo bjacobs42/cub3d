@@ -5,22 +5,31 @@
 #include <exception>
 #include <fstream>
 #include <sstream>
+#include <string>
+#include <utility>
+#include <vector>
 
-bool	Parser::_checkMapLine(const std::string& line)
+ParseResult	Parser::_checkMapLine(const std::string& line)
 {
 	for (char c : line)
 	{
 		if (c == 'D' && !(_flags & DOOR_INCLUDED))
 			_flags |= DOOR_INCLUDED;
-		if (!std::strchr(MAP_CHARS, c))
-			return (false);
+		else if (std::strchr(PLAYER_CHARS, c))
+		{
+			if (_flags & PLAYER_FOUND)
+				return (ParseResult(ERROR, "Second player spawn location \"" + line + "\""));
+			_flags |= PLAYER_FOUND;
+		}
+		else if (!std::strchr(MAP_CHARS, c))
+			return (ParseResult(ERROR, "Invalid map format; \"" + line + "\""));
 	}
-	return (true);
+	return (ParseResult(OK));
 }
 
 ParseResult	Parser::_checkData(void)
 {
-	if (!(_flags & MAP_PROCESSED))
+	if (!_configData.map)
 		return (ParseResult(ERROR, "No map found"));
 	for (size_t i = 0; i < TextureType::DOOR; ++i)
 	{
@@ -40,19 +49,22 @@ Parser::~Parser(void)
 
 ParseResult	Parser::_processMap(std::ifstream& file, std::string& line)
 {
+	std::vector<std::string>	mapData;
+
 	do 
 	{
 		ParserHelpers::rtrim(line);
 		if (line.empty())
 			break;
-		if (!_checkMapLine(line))
-			return (ParseResult(ERROR, "Invalid map format: \"" + line + "\""));
-		_configData.mapData.push_back(line);
+		ParseResult result = _checkMapLine(line);
+		if (!result.ok)
+			return (result);
+		mapData.push_back(line);
 	}
 	while (std::getline(file, line));
-	if (_configData.mapData.empty())
+	if (mapData.empty())
 		return (ParseResult(ERROR, "Missing map section"));
-	_flags |= MAP_PROCESSED;
+	_configData.map = Map(std::move(mapData));
 	return (ParseResult(OK));
 }
 
@@ -83,9 +95,9 @@ ParseResult	Parser::_processFnC(const std::string& key, const std::string& color
 		}
 	}
 	if (key == "F") 
-		_configData.floor = RGBA(rgb[0], rgb[1], rgb[2]);
+		_configData.floorColor = RGBA(rgb[0], rgb[1], rgb[2]);
 	else
-		_configData.ceiling = RGBA(rgb[0], rgb[1], rgb[2]);
+		_configData.ceilingColor = RGBA(rgb[0], rgb[1], rgb[2]);
 	return (ParseResult(OK));
 }
 
@@ -126,10 +138,10 @@ ParseResult	Parser::_processLine(std::ifstream& file, std::string& line)
 		ParserHelpers::eraseWhiteSpace(texturePath);
 		return (_processTexture(key, texturePath));
 	}
-	else if (!(_flags & MAP_PROCESSED))
+	else if (!_configData.map)
 		return (_processMap(file, line));
 	else
-		return (ParseResult(ERROR, "Unexpected line or misplaced content: " + line));
+		return (ParseResult(ERROR, "Unexpected line or misplaced content: \"" + line + "\""));
 }
 
 const Config&	Parser::getConfig(void) const

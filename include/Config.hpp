@@ -2,8 +2,9 @@
 
 #include <array>
 #include <memory>
+#include <optional>
 #include <ostream>
-#include <vector>
+#include "Map.hpp"
 #include "RGBA.hpp"
 #include "MLX42.h"
 
@@ -18,9 +19,9 @@ struct MlxTextureDeleter {
 using UniqueTexturePtr = std::unique_ptr<mlx_texture_t, MlxTextureDeleter>;
 struct Config
 {
-	RGBA							floor;
-	RGBA							ceiling;
-	std::vector<std::string>		mapData;
+	RGBA							floorColor;
+	RGBA							ceilingColor;
+	std::optional<Map>				map;
 	std::array<UniqueTexturePtr, 5>	textures{};
 };
 std::ostream&	operator<<(std::ostream& os, const Config& config);

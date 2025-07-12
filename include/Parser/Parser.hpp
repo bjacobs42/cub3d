@@ -6,11 +6,12 @@
 
 #define OK true
 #define ERROR false
-#define MAP_CHARS "10DNEWS \t"
+#define	PLAYER_CHARS "NEWS"
+#define MAP_CHARS "10D \t"
 
 enum Flags : uint8_t {
 	DOOR_INCLUDED = 1 << 0,
-	MAP_PROCESSED = 1 << 1
+	PLAYER_FOUND = 1 << 1
 };
 
 struct ParseResult {
@@ -33,7 +34,7 @@ class Parser
 		ParseResult	_processFnC(const std::string& key, const std::string& color);
 		ParseResult	_processTexture(const std::string& key,  const std::string& path);
 
-		bool		_checkMapLine(const std::string& line);
+		ParseResult	_checkMapLine(const std::string& line);
 		ParseResult	_checkData(void);
 
 	public:
