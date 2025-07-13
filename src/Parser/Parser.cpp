@@ -1,43 +1,21 @@
 #include "Parser/Parser.hpp"
 #include "Parser/ParserHelpers.hpp"
 #include "TextureUtils.hpp"
-#include <cstring>
-#include <exception>
 #include <fstream>
 #include <sstream>
 #include <string>
-#include <utility>
-#include <vector>
-
-ParseResult	Parser::_checkMapLine(const std::string& line)
-{
-	for (char c : line)
-	{
-		if (c == 'D' && !(_flags & DOOR_INCLUDED))
-			_flags |= DOOR_INCLUDED;
-		else if (std::strchr(PLAYER_CHARS, c))
-		{
-			if (_flags & PLAYER_FOUND)
-				return (ParseResult(ERROR, "Second player spawn location \"" + line + "\""));
-			_flags |= PLAYER_FOUND;
-		}
-		else if (!std::strchr(MAP_CHARS, c))
-			return (ParseResult(ERROR, "Invalid map format; \"" + line + "\""));
-	}
-	return (ParseResult(OK));
-}
 
 ParseResult	Parser::_checkData(void)
 {
 	if (!_configData.map)
-		return (ParseResult(ERROR, "No map found"));
+		return (ParseResult(ERROR, "Missing data: No map found"));
 	for (size_t i = 0; i < TextureType::DOOR; ++i)
 	{
 		if (!_configData.textures[i].get())
-			return (ParseResult(ERROR, "Missing textures or no textures found"));
+			return (ParseResult(ERROR, "Missing data: No texture(s) found"));
 	}
-	if (_flags & DOOR_INCLUDED && !_configData.textures[TextureType::DOOR])
-		return (ParseResult(ERROR, "Missing texture or no texture found for door"));
+	if (_configData.map->getCharsLocation("D") && !_configData.textures[TextureType::DOOR])
+		return (ParseResult(ERROR, "Missing data: No texture found for door"));
 	return (ParseResult(OK));
 }
 
@@ -56,15 +34,19 @@ ParseResult	Parser::_processMap(std::ifstream& file, std::string& line)
 		ParserHelpers::rtrim(line);
 		if (line.empty())
 			break;
-		ParseResult result = _checkMapLine(line);
-		if (!result.ok)
-			return (result);
 		mapData.push_back(line);
 	}
 	while (std::getline(file, line));
 	if (mapData.empty())
-		return (ParseResult(ERROR, "Missing map section"));
-	_configData.map = Map(std::move(mapData));
+		return (ParseResult(ERROR, "Missing data: No map found"));
+	try
+	{
+		_configData.map = Map(std::move(mapData));
+	}
+	catch (const std::exception& e)
+	{
+		return ParseResult(ERROR, e.what());
+	}
 	return (ParseResult(OK));
 }
 

@@ -27,7 +27,7 @@ INC_DIR		:= ./include/
 OBJ_DIR 	:= ./obj/
 SRC_DIR 	:= ./src/
 
-HEADER_FILES 	:= Map.hpp Player.hpp RGBA.hpp Vec2.hpp TextureUtils.hpp
+HEADER_FILES 	:= Map.hpp Player.hpp RGBA.hpp Vectors.hpp TextureUtils.hpp
 HEADER_FILES	+= $(addprefix $(PARSER_DIR),Parser.hpp ParserHelpers.hpp)
 
 PARSER_FILES	:= Parser.cpp ParserHelpers.cpp
