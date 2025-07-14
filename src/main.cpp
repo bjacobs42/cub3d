@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Parser/Parser.hpp"
+#include "Game.hpp"
 
 int	main(int argc, char  **argv)
 {
@@ -8,14 +8,15 @@ int	main(int argc, char  **argv)
 		std::cout << "Cub3d: Usage: ./cub3d [filename].cub" << std::endl;
 		return (1);
 	}
-	Parser parser(argv[1]);
-	ParseResult result = parser.parse();
+
+	Game	game;
+	Result	result = Game::init(game, argv[1]);
 	if (!result.ok)
 	{
 		std::cout << "Cub3d: " << result.message << std::endl;
 		return (1);
 	}
-	const Config& config = parser.getConfig();
-	std::cout << config << std::endl;
+	std::cout << game << std::endl;
+	// start render
 	return (0);
 }

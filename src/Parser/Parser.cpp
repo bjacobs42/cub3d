@@ -1,23 +1,10 @@
 #include "Parser/Parser.hpp"
 #include "Parser/ParserHelpers.hpp"
+#include "Result.hpp"
 #include "TextureUtils.hpp"
 #include <fstream>
 #include <sstream>
 #include <string>
-
-ParseResult	Parser::_checkData(void)
-{
-	if (!_configData.map)
-		return (ParseResult(ERROR, "Missing data: No map found"));
-	for (size_t i = 0; i < TextureType::DOOR; ++i)
-	{
-		if (!_configData.textures[i].get())
-			return (ParseResult(ERROR, "Missing data: No texture(s) found"));
-	}
-	if (_configData.map->getCharsLocation("D") && !_configData.textures[TextureType::DOOR])
-		return (ParseResult(ERROR, "Missing data: No texture found for door"));
-	return (ParseResult(OK));
-}
 
 Parser::Parser(const std::string& filePath)
 	: _filePath(filePath) {}
@@ -25,46 +12,36 @@ Parser::Parser(const std::string& filePath)
 Parser::~Parser(void)
 {}
 
-ParseResult	Parser::_processMap(std::ifstream& file, std::string& line)
+Result	Parser::_processMap(std::ifstream& file, std::string& line)
 {
-	std::vector<std::string>	mapData;
-
 	do 
 	{
 		ParserHelpers::rtrim(line);
 		if (line.empty())
 			break;
-		mapData.push_back(line);
+		_config.mapData.push_back(line);
 	}
 	while (std::getline(file, line));
-	if (mapData.empty())
-		return (ParseResult(ERROR, "Missing data: No map found"));
-	try
-	{
-		_configData.map = Map(std::move(mapData));
-	}
-	catch (const std::exception& e)
-	{
-		return ParseResult(ERROR, e.what());
-	}
-	return (ParseResult(OK));
+	if (_config.mapData.empty())
+		return (Result(ERROR, "Missing data: No map found"));
+	return (Result(OK));
 }
 
-ParseResult	Parser::_processFnC(const std::string& key, const std::string& color)
+Result	Parser::_processFnC(const std::string& key, const std::string& color)
 {
 	std::string	token;
 	int			rgb[3];
 	int			count;
 
 	if (color.empty())
-		return (ParseResult(ERROR, "Missing color for " + key));
+		return (Result(ERROR, "Missing color: No color rgba value found after ", key));
 
 	count = 0;
 	std::stringstream ss(color);
 	while (std::getline(ss, token, ','))
 	{
 		if (count >= 3)
-			return (ParseResult(ERROR, "Invalid rgb format: \"" + color + "\""));
+			return (Result(ERROR, "Invalid color format: ", color));
 		try
 		{
 			rgb[count] = std::stoi(token);
@@ -73,33 +50,31 @@ ParseResult	Parser::_processFnC(const std::string& key, const std::string& color
 		}
 		catch (const std::exception& e)
 		{
-			return (ParseResult(ERROR, "Invalid color value: \"" + color + "\""));
+			return (Result(ERROR, "Invalid color value: ", color));
 		}
 	}
 	if (key == "F") 
-		_configData.floorColor = RGBA(rgb[0], rgb[1], rgb[2]);
+		_config.floorColor = RGBA(rgb[0], rgb[1], rgb[2]);
 	else
-		_configData.ceilingColor = RGBA(rgb[0], rgb[1], rgb[2]);
-	return (ParseResult(OK));
+		_config.ceilingColor = RGBA(rgb[0], rgb[1], rgb[2]);
+	return (Result(OK));
 }
 
-ParseResult	Parser::_processTexture(const std::string& key,  const std::string& path)
+Result	Parser::_processTexture(const std::string& key,  const std::string& path)
 {
 	if (path.empty())
-		return (ParseResult(ERROR, "Missing texture for \"" + key + "\""));
+		return (Result(ERROR, "Missing texture: No texture found for ", key));
 	if (!ParserHelpers::endsWith(path, ".png"))
-		return (ParseResult(ERROR, "Unsupported texture extension"));
+		return (Result(ERROR, "Invalid texture: Unsupported texture file"));
 
 	TextureType	type = TextureUtils::keyToTextureType(key);
 	if (type == TextureType::INVALID_TEXTURE)
-		return (ParseResult(ERROR, "Unknown texture type \"" + key + "\""));
-	_configData.textures[type] = UniqueTexturePtr(mlx_load_png(path.c_str()));
-	if (!_configData.textures[type])
-		return (ParseResult(ERROR, "Failed to load texture \"" + path + "\""));
-	return (ParseResult(OK));
+		return (Result(ERROR, "Unknown texture type: ", key));
+	_config.texturePaths[type] = path;
+	return (Result(OK));
 }
 
-ParseResult	Parser::_processLine(std::ifstream& file, std::string& line)
+Result	Parser::_processLine(std::ifstream& file, std::string& line)
 {
 	std::istringstream	iss(line);
 	std::string			key;
@@ -120,34 +95,34 @@ ParseResult	Parser::_processLine(std::ifstream& file, std::string& line)
 		ParserHelpers::eraseWhiteSpace(texturePath);
 		return (_processTexture(key, texturePath));
 	}
-	else if (!_configData.map)
+	else if (_config.mapData.empty())
 		return (_processMap(file, line));
 	else
-		return (ParseResult(ERROR, "Unexpected line or misplaced content: \"" + line + "\""));
+		return (Result(ERROR, "Unexpected line or misplaced content: ", line));
 }
 
-const Config&	Parser::getConfig(void) const
+Config&		Parser::getConfig(void)
 {
-	return (_configData);
+	return (_config);
 }
 
-ParseResult	Parser::parse(void)
+Result	Parser::parse(void)
 {
 	std::ifstream	file;
 	std::string		line;
 
 	if (!ParserHelpers::endsWith(_filePath, ".cub"))
-		return (ParseResult(ERROR, "Unsupported file extension"));
+		return (Result(ERROR, "Unsupported file"));
 	file.open(_filePath);
 	if (!file.is_open())
-		return (ParseResult(ERROR, "Invalid cub file"));
+		return (Result(ERROR, "Invalid cub file"));
 
 	while (std::getline(file, line))
 	{
 		if (ParserHelpers::isLineEmpty(line))
 			continue;
-		ParseResult processResult = _processLine(file, line);
+		Result processResult = _processLine(file, line);
 		if (!processResult.ok) return (processResult);
 	}
-	return (_checkData());
+	return (Result(OK));
 }

@@ -4,6 +4,7 @@
 #include <array>
 #include <cassert>
 #include <cstddef>
+#include <functional>
 #include <initializer_list>
 
 template <typename T, size_t N>
@@ -141,11 +142,29 @@ class Vector
 		{
 			return (this->sum() < rhs.sum());
 		}
-		bool	operator>(const Vector<T, N>& rhs) const
-		{
-			return (this->sum() > rhs.sum());
+
+		bool operator==(const Vector<T, N>& rhs) const {
+			for (size_t i = 0; i < N; ++i) {
+				if (_data[i] != rhs[i])
+					return false;
+			}
+			return true;
 		}
 };
+
+namespace std {
+	template <typename T, size_t N>
+	struct hash<Vector<T, N>> {
+		std::size_t operator()(const Vector<T, N>& vec) const {
+			std::size_t h = 0;
+			for (size_t i = 0; i < N; ++i) {
+				h ^= std::hash<T>{}(vec[i]) + 0x9e3779b9 + (h << 6) + (h >> 2); // hash combine
+			}
+			return h;
+		}
+	};
+}
+
 
 template <typename T = double>
 struct Vec2 : public Vector<T, 2>

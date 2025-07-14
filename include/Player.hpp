@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Vec2.hpp"
+#include "Vectors.hpp"
 
 class Player
 {
@@ -14,7 +14,7 @@ class Player
 		Player(const Vec2<double>& speed, const Vec2<double>& pos, const float& angle)
 			: _speed(speed), _position(pos), _look_angle(angle) {}
 		Player(const Player& source) { *this = source; }
-		~Player(void);
+		~Player(void) {};
 
 		Player& operator=(const Player& source)
 		{

@@ -1,43 +1,39 @@
 #pragma once
 
-#include "Config.hpp"
-#include <cstdint>
+#include "RGBA.hpp"
+#include "Result.hpp"
+#include "TextureUtils.hpp"
+#include <array>
 #include <string>
+#include <vector>
 
 #define OK true
 #define ERROR false
 
-enum Flags : uint8_t {
-	DOOR_INCLUDED = 1 << 0,
-	PLAYER_FOUND = 1 << 1
-};
-
-struct ParseResult {
-	bool		ok;
-	std::string	message;
-
-	ParseResult(bool ok, const std::string& msg = "")
-		: ok(ok), message(msg) {}
+struct Config
+{
+	std::vector<std::string>					mapData;
+	std::array<std::string, INVALID_TEXTURE>	texturePaths;
+	RGBA										floorColor;
+	RGBA										ceilingColor;
 };
 
 class Parser
 {
 	private:
-		uint8_t		_flags;
-		std::string	_filePath;
-		Config		_configData;
+		std::string					_filePath;
+		Config						_config;
 
-		ParseResult	_processMap(std::ifstream& file, std::string& line);
-		ParseResult	_processLine(std::ifstream& file, std::string& line);
-		ParseResult	_processFnC(const std::string& key, const std::string& color);
-		ParseResult	_processTexture(const std::string& key,  const std::string& path);
-
-		ParseResult	_checkData(void);
+		Result	_processMap(std::ifstream& file, std::string& line);
+		Result	_processLine(std::ifstream& file, std::string& line);
+		Result	_processFnC(const std::string& key, const std::string& color);
+		Result	_processTexture(const std::string& key,  const std::string& path);
 
 	public:
 		explicit Parser(const std::string& filePath);
 		~Parser(void);
 
-		ParseResult		parse(void);
-		const Config&	getConfig(void) const;
+		Result		parse(void);
+
+		Config&		getConfig(void);
 };
