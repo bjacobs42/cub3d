@@ -3,11 +3,11 @@
 #include <array>
 #include <memory>
 #include <ostream>
-#include "Map.hpp"
+#include "Game/Map.hpp"
 #include "MLX42.h"
-#include "Player.hpp"
-#include "Result.hpp"
-#include "TextureUtils.hpp"
+#include "Game/Player/Player.hpp"
+#include "Utils/Result.hpp"
+#include "Utils/TextureUtils.hpp"
 
 struct MlxTextureDeleter {
 	void operator()(mlx_texture_t* texture) const

@@ -1,7 +1,7 @@
 #include "Parser/Parser.hpp"
 #include "Parser/ParserHelpers.hpp"
-#include "Result.hpp"
-#include "TextureUtils.hpp"
+#include "Utils/Result.hpp"
+#include "Utils/TextureUtils.hpp"
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -34,14 +34,14 @@ Result	Parser::_processFnC(const std::string& key, const std::string& color)
 	int			count;
 
 	if (color.empty())
-		return (Result(ERROR, "Missing color: No color rgba value found after ", key));
+		return (Result(ERROR, "Missing color: No rgb value found after ", key));
 
 	count = 0;
 	std::stringstream ss(color);
 	while (std::getline(ss, token, ','))
 	{
 		if (count >= 3)
-			return (Result(ERROR, "Invalid color format: ", color));
+			return (Result(ERROR, "Invalid rgb format: ", color));
 		try
 		{
 			rgb[count] = std::stoi(token);
@@ -50,7 +50,7 @@ Result	Parser::_processFnC(const std::string& key, const std::string& color)
 		}
 		catch (const std::exception& e)
 		{
-			return (Result(ERROR, "Invalid color value: ", color));
+			return (Result(ERROR, "Invalid rgb value: ", color));
 		}
 	}
 	if (key == "F") 

@@ -18,33 +18,32 @@ else
 endif
 
 # Directories and Files
-PARSER_DIR		:= Parser/
-RGBA_DIR		:= RGBA/
-GAME_DIR		:= Game/
-MAP_DIR			:= Map/
-UTILS_DIR		:= Utils/
 INC_DIR			:= ./include/
 OBJ_DIR		 	:= ./obj/
 SRC_DIR 		:= ./src/
 
-HEADER_FILES 	:= Map.hpp Player.hpp RGBA.hpp Vectors.hpp TextureUtils.hpp Game.hpp
-HEADER_FILES	+= $(addprefix $(PARSER_DIR),Parser.hpp ParserHelpers.hpp)
+PARSER_DIR		:= Parser/
+GAME_DIR		:= Game/
+UTILS_DIR		:= Utils/
+PLAYER_DIR		:= $(GAME_DIR)Player/
 
 PARSER_FILES	:= Parser.cpp ParserHelpers.cpp
-UTILS_FILES		:= TextureUtils.cpp
-MAP_FILES		:= Map.cpp
-RGBA_FILES		:= RGBA.cpp
-GAME_FILES		:= Game.cpp
+UTILS_FILES		:= TextureUtils.cpp RGBA.cpp Window.cpp
+GAME_FILES		:= Game.cpp Map.cpp
+PLAYER_FILES	:= Player.cpp Camera.cpp
+
+HEADER_FILES 	:= $(UTILS_DIR)Vectors.hpp $(UTILS_DIR)Result.hpp
+
+SRC :=	$(addprefix $(PARSER_DIR),$(PARSER_FILES))
+SRC +=	$(addprefix $(GAME_DIR),$(GAME_FILES))
+SRC +=	$(addprefix $(UTILS_DIR),$(UTILS_FILES))
+SRC +=	$(addprefix $(PLAYER_DIR),$(PLAYER_FILES))
+
+HEADER_FILES += $(SRC:.cpp=.hpp)
+
+SRC +=	main.cpp
 
 HEADERS := $(addprefix $(INC_DIR),$(HEADER_FILES))
-
-SRC :=	main.cpp
-SRC +=	$(addprefix $(PARSER_DIR),$(PARSER_FILES))
-SRC +=	$(addprefix $(RGBA_DIR),$(RGBA_FILES))
-SRC +=	$(addprefix $(GAME_DIR),$(GAME_FILES))
-SRC +=	$(addprefix $(MAP_DIR),$(MAP_FILES))
-SRC +=	$(addprefix $(UTILS_DIR),$(UTILS_FILES))
-
 OBJ := $(addprefix $(OBJ_DIR),$(SRC:.cpp=.o))
 
 # Targets

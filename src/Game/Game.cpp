@@ -1,9 +1,9 @@
-#include "Game.hpp"
+#include "Game/Game.hpp"
+#include "Game/Map.hpp"
 #include "MLX42.h"
-#include "Map.hpp"
 #include "Parser/Parser.hpp"
-#include "Result.hpp"
-#include "TextureUtils.hpp"
+#include "Utils/Result.hpp"
+#include "Utils/TextureUtils.hpp"
 #include <array>
 #include <exception>
 #include <iostream>
@@ -16,6 +16,7 @@ Result	Game::init(Game& game, const std::string& configFilePath)
 	if (!result.ok)
 		return (result);
 	Config&	config = parser.getConfig();
+
 	try {
 		game._map = Map(std::move(config.mapData));
 	} catch (const std::exception& e) {
@@ -26,6 +27,9 @@ Result	Game::init(Game& game, const std::string& configFilePath)
 		return (result);
 	game._map->setCeilingColor(config.ceilingColor);
 	game._map->setFloorColor(config.floorColor);
+
+	Vec2<int> spawnTile = game._map->getSpawnLocation();
+	game._player = Player(Map::tileToWorldPos(spawnTile) + TILE_SIZE * 0.5, game.getMap()[spawnTile]);
 	return (Result(OK));
 }
 

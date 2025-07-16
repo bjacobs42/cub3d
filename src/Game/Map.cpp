@@ -1,6 +1,6 @@
-#include "Map.hpp"
-#include "RGBA.hpp"
-#include "Vectors.hpp"
+#include "Game/Map.hpp"
+#include "Utils/RGBA.hpp"
+#include "Utils/Vectors.hpp"
 #include <cassert>
 #include <cstring>
 #include <iostream>
@@ -85,6 +85,11 @@ bool	Map::_validateFloodFillBFS(const Map& map, Vec2<int> start)
 	return (true);
 }
 
+Vec2<double>	Map::tileToWorldPos(const Vec2<int>& tile)
+{
+	return (tile.to<double>() * TILE_SIZE);
+}
+
 std::optional<Vec2<double>>	Map::getCharsLocation(const std::string& needles) const
 {
 	int	mapHeight = _dimension.y();
@@ -96,6 +101,11 @@ std::optional<Vec2<double>>	Map::getCharsLocation(const std::string& needles) co
 			return (Vec2(double(x), double(y)));
 	}
 	return (std::nullopt);
+}
+
+Vec2<int>	Map::getSpawnLocation(void) const
+{
+	return (_spawnLocation);
 }
 
 void	Map::setFloorColor(const RGBA& newColor)

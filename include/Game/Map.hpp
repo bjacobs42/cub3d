@@ -1,8 +1,8 @@
 #pragma once
 
-#include "RGBA.hpp"
-#include "Result.hpp"
-#include "Vectors.hpp"
+#include "Utils/RGBA.hpp"
+#include "Utils/Result.hpp"
+#include "Utils/Vectors.hpp"
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -11,6 +11,8 @@
 #define WALKABLE_TILES "0D"
 #define	PLAYER_CHARS "NEWS"
 #define MAP_CHARS "10D \t"
+
+#define TILE_SIZE 8
 
 class MapError : public std::runtime_error
 {
@@ -37,9 +39,12 @@ class Map
 		explicit Map(const std::vector<std::string>& mapData);
 		~Map(void);
 
+		static Vec2<double>	tileToWorldPos(const Vec2<int>& tile);
+		static Vec2<double>	WorldPosToTile(const Vec2<double>& worldPos);
+
 		const std::vector<std::string>&	getRawMap(void) const;
 		std::optional<Vec2<double>>		getCharsLocation(const std::string& chars) const;
-		Vec2<double>					getSpawnLocation(void) const;
+		Vec2<int>						getSpawnLocation(void) const;
 		RGBA							getFloorColor(void) const;
 		RGBA							getCeilingColor(void) const;
 

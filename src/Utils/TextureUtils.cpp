@@ -1,4 +1,4 @@
-#include "TextureUtils.hpp"
+#include "Utils/TextureUtils.hpp"
 
 namespace TextureUtils {
 	TextureType	keyToTextureType(const std::string& key)

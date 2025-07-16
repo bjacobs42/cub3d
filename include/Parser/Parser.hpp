@@ -1,8 +1,8 @@
 #pragma once
 
-#include "RGBA.hpp"
-#include "Result.hpp"
-#include "TextureUtils.hpp"
+#include "Utils/RGBA.hpp"
+#include "Utils/Result.hpp"
+#include "Utils/TextureUtils.hpp"
 #include <array>
 #include <string>
 #include <vector>

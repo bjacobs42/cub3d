@@ -60,6 +60,15 @@ class Vector
 
 		size_t	size(void) const { return (N); }
 
+		template<typename U>
+		Vector<U, N>	to(void) const
+		{
+			Vector<U, N>	newVector;
+			for (size_t	i = 0; i < N; ++i)
+				newVector[i] = static_cast<U>(this->_data[i]);
+			return (newVector);
+		}
+
 		T	sum(void) const
 		{
 			T	sum;
